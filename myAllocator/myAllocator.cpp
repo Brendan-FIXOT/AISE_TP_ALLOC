@@ -2,7 +2,8 @@
 #include <cassert>
 
 // Constructeur : initialise les listes chaînées
-Allocator::Allocator() : free_lists(NUM_CLASSES, nullptr) {}
+Allocator::Allocator() 
+    : free_lists(NUM_CLASSES, nullptr), list_mutexes(NUM_CLASSES) {}
 
 // Destructeur : nettoie les blocs restants (appel optionnel à munmap)
 Allocator::~Allocator() {
@@ -45,12 +46,17 @@ void* Allocator::my_malloc(size_t size) {
     // Aligner la taille et trouver la classe correspondante
     size_t aligned_size = align_size(size);
     size_t class_index = get_class_index(aligned_size);
+    
+    {
+        // Lock pour protéger l'accès à la liste chaînée
+        std::lock_guard<std::mutex> lock(list_mutexes[class_index]);
 
-    // Si un bloc est disponible dans la liste, réutiliser
-    if (free_lists[class_index] != nullptr) {
-        FreeBlock* block = free_lists[class_index];
-        free_lists[class_index] = block->next; // Retirer le bloc de la liste
-        return block;
+        // Si un bloc est disponible dans la liste, réutiliser
+        if (free_lists[class_index] != nullptr) {
+            FreeBlock* block = free_lists[class_index];
+            free_lists[class_index] = block->next; // Retirer le bloc de la liste
+            return block;
+        }
     }
 
     // Allocation la mémoire avec mmap
@@ -73,10 +79,15 @@ void Allocator::my_free(void* ptr, size_t size) {
     size_t aligned_size = align_size(size);
     size_t class_index = get_class_index(aligned_size);
 
-    // Ajouter le bloc à la liste chaînée
-    FreeBlock* block = (FreeBlock*)ptr;
-    block->next = free_lists[class_index];
-    free_lists[class_index] = block;
+    {
+        // Lock pour protéger l'accès à la liste chaînée
+        std::lock_guard<std::mutex> lock(list_mutexes[class_index]);
+
+        // Ajouter le bloc à la liste chaînée
+        FreeBlock* block = (FreeBlock*)ptr;
+        block->next = free_lists[class_index];
+        free_lists[class_index] = block;
+    }
 
     // Nettoyer la liste si elle devient trop grande
     cleanup_free_list(class_index, aligned_size);
@@ -85,6 +96,9 @@ void Allocator::my_free(void* ptr, size_t size) {
 // Fonction pour limiter la taille d'une liste chaînée
 void Allocator::cleanup_free_list(size_t class_index, size_t block_size) {
     size_t free_count = 0;
+
+    std::lock_guard<std::mutex> lock(list_mutexes[class_index]); // Protection de la liste chaînée
+
     FreeBlock* current = free_lists[class_index];
     FreeBlock* prev = nullptr;
 

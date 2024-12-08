@@ -1,7 +1,7 @@
 #include "benchmark.h"
 
 // Benchmark pour malloc/free
-void benchmark_malloc_free(size_t num_allocations, size_t size, int methode_chosen) {
+float benchmark_malloc_free(size_t num_allocations, size_t size, int methode_chosen) {
     if (methode_chosen == 1) {
         auto start = std::chrono::high_resolution_clock::now();
 
@@ -20,11 +20,9 @@ void benchmark_malloc_free(size_t num_allocations, size_t size, int methode_chos
         delete[] pointers;
 
         auto end = std::chrono::high_resolution_clock::now();
-        auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
+        float duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
 
-        std::cout << "malloc/free (méthode 1) : " << num_allocations << " allocations et désallocations de "
-                  << size << " octets en " << duration << " µs ("
-                  << (num_allocations * 1e6 / duration) << " opérations/sec)\n";
+        return duration;
     } 
     else if (methode_chosen == 2) {
         auto start = std::chrono::high_resolution_clock::now();
@@ -42,17 +40,16 @@ void benchmark_malloc_free(size_t num_allocations, size_t size, int methode_chos
         auto end = std::chrono::high_resolution_clock::now();
         auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
 
-        std::cout << "malloc/free (méthode 2) : " << num_allocations << " allocations et désallocations de "
-                  << size << " octets en " << duration << " µs ("
-                  << (num_allocations * 1e6 / duration) << " opérations/sec)\n";
+        return duration;
     } 
     else {
         std::cout << "Le choix de la méthode n'est pas bon, il n'y a que la 1 et 2." << std::endl;
+        return 0;
     }
 }
 
 // Benchmark pour my_malloc/my_free
-void benchmark_my_malloc_free(size_t num_allocations, size_t size, int methode_chosen) {
+float benchmark_my_malloc_free(size_t num_allocations, size_t size, int methode_chosen) {
     Allocator allocator;
     if (methode_chosen == 1) {
         auto start = std::chrono::high_resolution_clock::now();
@@ -74,9 +71,7 @@ void benchmark_my_malloc_free(size_t num_allocations, size_t size, int methode_c
         auto end = std::chrono::high_resolution_clock::now();
         auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
 
-        std::cout << "my_malloc/my_free (méthode 1) : " << num_allocations << " allocations et désallocations de "
-                  << size << " octets en " << duration << " µs ("
-                  << (num_allocations * 1e6 / duration) << " opérations/sec)\n";
+        return duration;
     }
     else if (methode_chosen == 2)
     {
@@ -95,17 +90,16 @@ void benchmark_my_malloc_free(size_t num_allocations, size_t size, int methode_c
         auto end = std::chrono::high_resolution_clock::now();
         auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
 
-        std::cout << "my_malloc/my_free (méthode 2) : " << num_allocations << " allocations et désallocations de "
-                  << size << " octets en " << duration << " µs ("
-                  << (num_allocations * 1e6 / duration) << " opérations/sec)\n";
+        return duration;
     }
     else {
         std::cout << "Le choix de la méthode n'est pas bon, il n'y a que la 1 et 2." << std::endl;
+        return 0;
     } 
 }
 
 // Benchmark pour my_malloc_basic/my_free_basic
-void benchmark_my_malloc_free_basic(size_t num_allocations, size_t size, int methode_chosen) {
+float benchmark_my_malloc_free_basic(size_t num_allocations, size_t size, int methode_chosen) {
     if (methode_chosen == 1) {
         auto start = std::chrono::high_resolution_clock::now();
 
@@ -126,9 +120,7 @@ void benchmark_my_malloc_free_basic(size_t num_allocations, size_t size, int met
         auto end = std::chrono::high_resolution_clock::now();
         auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
 
-        std::cout << "my_malloc_basic/my_free_basic (méthode 1) : " << num_allocations << " allocations et désallocations de "
-                  << size << " octets en " << duration << " µs ("
-                  << (num_allocations * 1e6 / duration) << " opérations/sec)\n";
+        return duration;
     }
     else if (methode_chosen == 2) {
         auto start = std::chrono::high_resolution_clock::now();
@@ -146,11 +138,10 @@ void benchmark_my_malloc_free_basic(size_t num_allocations, size_t size, int met
         auto end = std::chrono::high_resolution_clock::now();
         auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
 
-        std::cout << "my_malloc_basic/my_free_basic (méthode 2) : " << num_allocations << " allocations et désallocations de "
-                  << size << " octets en " << duration << " µs ("
-                  << (num_allocations * 1e6 / duration) << " opérations/sec)\n";
+        return duration;
     }
     else {
         std::cout << "Le choix de la méthode n'est pas bon, il n'y a que la 1 et 2." << std::endl;
+        return 0;
     }
 }

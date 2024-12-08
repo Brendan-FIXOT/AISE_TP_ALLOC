@@ -7,6 +7,7 @@
 #include <stdio.h>
 #include <vector>
 #include <string.h>
+#include <mutex>
 
 // Structure pour représenter un bloc libre
 struct FreeBlock {
@@ -22,6 +23,9 @@ private:
     // Tableau de listes chaînées pour les blocs libres
     static const size_t NUM_CLASSES = 32; // Nombre de classes de tailles (par exemple, 2^5 à 2^36)
     std::vector<FreeBlock*> free_lists;
+
+    // Tableau de mutex pour protéger chaque liste chaînée
+    std::vector<std::mutex> list_mutexes;
 
     // Politique pour gérer les blocs libres (exemple : taille maximale d'une liste)
     static const size_t MAX_FREE_BLOCKS = 100;
