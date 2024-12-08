@@ -1,6 +1,6 @@
-#include "base.h"
+#include "myAllocatorBasic.h"
 
-void* my_malloc(size_t size) {
+void* my_malloc_basic(size_t size) {
     // On suppose un appel avec un élément non nul
     if (size == 0) {
         return NULL;
@@ -18,7 +18,7 @@ void* my_malloc(size_t size) {
     return ptr;
 }
 
-void my_free(void* ptr, size_t size) {
+void my_free_basic(void* ptr, size_t size) {
     if (ptr == NULL || size == 0) {
         return;
     }

@@ -4,7 +4,7 @@ cmake_minimum_required(VERSION 3.10)
 project(ALLOC_TP_AISE)
 
 # Définir les sources
-set(SOURCES1 base/base.cpp)
+set(SOURCES1 myAllocator/myAllocator.cpp myAllocatorBasic/myAllocatorBasic.cpp)
 set(SOURCES2 benchmark/main_bench.cpp benchmark/benchmark.cpp)
 
 # Option pour activer le profiling
