@@ -1,7 +1,7 @@
 #include "benchmark.h"
 
 int main() {
-    size_t num_allocations = 100000; // Nombre d'allocations
+    size_t num_allocations = 10000; // Nombre d'allocations
     size_t size = 128;              // Taille de chaque allocation
     int repetitions = 10;
 
@@ -20,7 +20,9 @@ int main() {
             duration2 += benchmark_my_malloc_free(num_allocations, size, methode);
 
             // Benchmark avec my_malloc_basic/my_free_basic (servant de témoin pour my_malloc/my_free)
-            duration3 += benchmark_my_malloc_free_basic(num_allocations, size, methode);        
+            duration3 += benchmark_my_malloc_free_basic(num_allocations, size, methode);
+
+            std::cout << "Itération : " << i + 1 << " fini." << std::endl;
         }
         duration1_mean = duration1/(double)repetitions;
         duration2_mean = duration2/(double)repetitions;

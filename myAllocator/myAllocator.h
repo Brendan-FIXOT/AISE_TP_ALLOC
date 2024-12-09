@@ -8,10 +8,13 @@
 #include <vector>
 #include <string.h>
 #include <mutex>
+#include <algorithm> // Pour std::sort
+
 
 // Structure pour représenter un bloc libre
 struct FreeBlock {
-    FreeBlock* next;
+    FreeBlock* next; // Pointeur vers le bloc suivant
+    size_t size; // Taille du bloc
 };
     
 class Allocator {
@@ -32,6 +35,12 @@ private:
     
     // Nettoyer les blocs inutilisés si nécessaire
     void cleanup_free_list(size_t class_index, size_t block_size);
+
+    // Fusionner les blocs libres adjacents
+    void coalesce_blocks(size_t class_index);
+
+    // Condition pour utiliser cleanup_free_list()
+    bool should_cleanup(size_t class_index);
 public:
     Allocator();
     ~Allocator();
