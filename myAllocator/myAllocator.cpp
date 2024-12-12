@@ -99,8 +99,7 @@ void Allocator::my_free(void* ptr, size_t size) {
         coalesce_blocks(class_index);
     }
     // Nettoyer la liste si elle devient trop grande
-    if (free_lists[class_index] && should_cleanup(class_index))
-        cleanup_free_list(class_index, aligned_size);
+    cleanup_free_list(class_index, aligned_size);
 }
 
 // Fonction pour limiter la taille d'une liste chaînée
@@ -133,45 +132,15 @@ void Allocator::cleanup_free_list(size_t class_index, size_t block_size) {
 
 void Allocator::coalesce_blocks(size_t class_index) {
     FreeBlock* current = free_lists[class_index];
-
-    // Trier les blocs libres par adresse (simple approche en O(n²))
-    std::vector<FreeBlock*> blocks;
-    while (current != nullptr) {
-        blocks.push_back(current);
-        current = current->next;
-    }
-    std::sort(blocks.begin(), blocks.end(), [](FreeBlock* a, FreeBlock* b) {
-        return a < b; // Trier par adresse
-    });
-
-    // Fusionner les blocs adjacents
-    free_lists[class_index] = nullptr;
     FreeBlock* prev = nullptr;
 
-    for (size_t i = 0; i < blocks.size(); i++) {
-        if (prev != nullptr && (char*)prev + prev->size == (char*)blocks[i]) {
-            // Fusionner les blocs adjacents
-            prev->size += blocks[i]->size;
-        } else {
-            // Ajouter le bloc à la liste chaînée
-            blocks[i]->next = free_lists[class_index];
-            free_lists[class_index] = blocks[i];
-            prev = blocks[i];
-        }
-    }
-}
-
-// Condition pour utiliser cleanup_free_list()
-bool Allocator::should_cleanup(size_t class_index) {
-    size_t count = 0;
-    FreeBlock* current = free_lists[class_index];
-
     while (current != nullptr) {
-        count++;
-        if (count > MAX_FREE_BLOCKS) {
-            return true;
+        if (prev && (char*)prev + prev->size == (char*)current) {
+            prev->size += current->size;
+            prev->next = current->next;
+        } else {
+            prev = current;
         }
         current = current->next;
     }
-    return false;
 }
