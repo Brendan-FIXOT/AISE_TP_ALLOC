@@ -2,10 +2,13 @@
 
 int main() {
     size_t num_allocations = 10000; // Nombre d'allocations
-    size_t size = 128;              // Taille de chaque allocation
+    size_t size = 128; // Taille de chaque allocation
+    size_t min_size = 16;
+    size_t max_size = 1024;
+    float free_probability = 0.2; // 20% de chances de libérer un bloc existant
     int repetitions = 10;
 
-    for (int methode = 1; methode < 3; ++methode) {
+    for (int methode = 1; methode < 4; ++methode) {
         double duration1_mean, duration2_mean, duration3_mean;
 
         double duration1 = 0.0;
@@ -14,15 +17,14 @@ int main() {
 
         for (int i = 0; i < repetitions; ++i) {
             // Benchmark avec malloc/free
-            duration1 += benchmark_malloc_free(num_allocations, size, methode);
+            duration1 += benchmark_malloc_free(num_allocations, size, min_size, max_size, free_probability, methode);
 
             // Benchmark avec my_malloc/my_free
-            duration2 += benchmark_my_malloc_free(num_allocations, size, methode);
+            duration2 += benchmark_my_malloc_free(num_allocations, size, min_size, max_size, free_probability, methode);
 
             // Benchmark avec my_malloc_basic/my_free_basic (servant de témoin pour my_malloc/my_free)
-            duration3 += benchmark_my_malloc_free_basic(num_allocations, size, methode);
+            duration3 += benchmark_my_malloc_free_basic(num_allocations, size, min_size, max_size, free_probability,     methode);
 
-            std::cout << "Itération : " << i + 1 << " fini." << std::endl;
         }
         duration1_mean = duration1/(double)repetitions;
         duration2_mean = duration2/(double)repetitions;

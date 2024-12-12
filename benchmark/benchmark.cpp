@@ -1,7 +1,17 @@
 #include "benchmark.h"
 
+// Générateur de nombres aléatoires (pour les tailles d'allocations et l'aléatoire des libérations)
+std::random_device rd;
+std::mt19937 gen(rd());
+
+// Fonction de génération de tailles d'allocations aléatoires.
+size_t random_size(size_t min_size, size_t max_size) {
+    std::uniform_int_distribution<size_t> dist(min_size, max_size);
+    return dist(gen);
+}
+
 // Benchmark pour malloc/free
-float benchmark_malloc_free(size_t num_allocations, size_t size, int methode_chosen) {
+float benchmark_malloc_free(size_t num_allocations, size_t size, size_t min_size, size_t max_size, float free_probability, int methode_chosen) {
     if (methode_chosen == 1) {
         auto start = std::chrono::high_resolution_clock::now();
 
@@ -41,7 +51,40 @@ float benchmark_malloc_free(size_t num_allocations, size_t size, int methode_cho
         auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
 
         return duration;
-    } 
+    }
+    else if (methode_chosen == 3) {
+        // Méthode bien plus réaliste (aléatoire)
+
+        std::vector<void*> active_pointers;
+
+        auto start = std::chrono::high_resolution_clock::now();
+
+        for (size_t i = 0; i < num_allocations; ++i) {
+            size_t alloc_size = random_size(min_size, max_size);
+            void* ptr = malloc(alloc_size);
+            if (ptr == nullptr) {
+                std::cerr << "Allocation failed at iteration " << i << "\n";
+                exit(EXIT_FAILURE);
+            }
+            active_pointers.push_back(ptr);
+
+            // Libération aléatoire des blocs
+            if (active_pointers.size() > 10 && ((float)rand() / RAND_MAX) < free_probability) {
+                size_t index = rand() % active_pointers.size();
+                free(active_pointers[index]);
+                active_pointers.erase(active_pointers.begin() + index);
+            }
+        }
+
+        // Libérer tous les blocs restants
+        for (void* ptr : active_pointers) {
+            free(ptr);
+        }
+
+        auto end = std::chrono::high_resolution_clock::now();
+        float duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
+        return duration;
+    }
     else {
         std::cout << "Le choix de la méthode n'est pas bon, il n'y a que la 1 et 2." << std::endl;
         return 0;
@@ -49,7 +92,7 @@ float benchmark_malloc_free(size_t num_allocations, size_t size, int methode_cho
 }
 
 // Benchmark pour my_malloc/my_free
-float benchmark_my_malloc_free(size_t num_allocations, size_t size, int methode_chosen) {
+float benchmark_my_malloc_free(size_t num_allocations, size_t size, size_t min_size, size_t max_size, float free_probability, int methode_chosen) {
     Allocator allocator;
     if (methode_chosen == 1) {
         auto start = std::chrono::high_resolution_clock::now();
@@ -92,6 +135,39 @@ float benchmark_my_malloc_free(size_t num_allocations, size_t size, int methode_
 
         return duration;
     }
+    else if (methode_chosen == 3) {
+        // Méthode bien plus réaliste (aléatoire)
+
+        std::vector<void*> active_pointers;
+
+        auto start = std::chrono::high_resolution_clock::now();
+
+        for (size_t i = 0; i < num_allocations; ++i) {
+            size_t alloc_size = random_size(min_size, max_size);
+            void* ptr = allocator.my_malloc(alloc_size);
+            if (ptr == nullptr) {
+                std::cerr << "Allocation failed at iteration " << i << "\n";
+                exit(EXIT_FAILURE);
+            }
+            active_pointers.push_back(ptr);
+
+            // Libération aléatoire des blocs
+            if (active_pointers.size() > 10 && ((float)rand() / RAND_MAX) < free_probability) {
+                size_t index = rand() % active_pointers.size();
+                allocator.my_free(active_pointers[index], alloc_size);
+                active_pointers.erase(active_pointers.begin() + index);
+            }
+        }
+
+        // Libérer tous les blocs restants
+        for (void* ptr : active_pointers) {
+            allocator.my_free(ptr, max_size);
+        }
+
+        auto end = std::chrono::high_resolution_clock::now();
+        float duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
+        return duration;
+    }
     else {
         std::cout << "Le choix de la méthode n'est pas bon, il n'y a que la 1 et 2." << std::endl;
         return 0;
@@ -99,7 +175,7 @@ float benchmark_my_malloc_free(size_t num_allocations, size_t size, int methode_
 }
 
 // Benchmark pour my_malloc_basic/my_free_basic
-float benchmark_my_malloc_free_basic(size_t num_allocations, size_t size, int methode_chosen) {
+float benchmark_my_malloc_free_basic(size_t num_allocations, size_t size, size_t min_size, size_t max_size, float free_probability, int methode_chosen) {
     if (methode_chosen == 1) {
         auto start = std::chrono::high_resolution_clock::now();
 
@@ -138,6 +214,39 @@ float benchmark_my_malloc_free_basic(size_t num_allocations, size_t size, int me
         auto end = std::chrono::high_resolution_clock::now();
         auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
 
+        return duration;
+    } 
+    else if (methode_chosen == 3) {
+        // Méthode bien plus réaliste (aléatoire)
+
+        std::vector<void*> active_pointers;
+
+        auto start = std::chrono::high_resolution_clock::now();
+
+        for (size_t i = 0; i < num_allocations; ++i) {
+            size_t alloc_size = random_size(min_size, max_size);
+            void* ptr = my_malloc_basic(alloc_size);
+            if (ptr == nullptr) {
+                std::cerr << "Allocation failed at iteration " << i << "\n";
+                exit(EXIT_FAILURE);
+            }
+            active_pointers.push_back(ptr);
+
+            // Libération aléatoire des blocs
+            if (active_pointers.size() > 10 && ((float)rand() / RAND_MAX) < free_probability) {
+                size_t index = rand() % active_pointers.size();
+                my_free_basic(active_pointers[index], alloc_size);
+                active_pointers.erase(active_pointers.begin() + index);
+            }
+        }
+
+        // Libérer tous les blocs restants
+        for (void* ptr : active_pointers) {
+            my_free_basic(ptr, max_size);
+        }
+
+        auto end = std::chrono::high_resolution_clock::now();
+        float duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
         return duration;
     }
     else {
