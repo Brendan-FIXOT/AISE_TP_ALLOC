@@ -8,6 +8,8 @@
 #include "../myAllocator/myAllocator.h" // Pour my_malloc/my_free
 #include "../myAllocatorBasic/myAllocatorBasic.h" // Pour my_malloc_basic/my_free_basic
 
+size_t random_size(size_t min_size, size_t max_size);
+
 float benchmark_malloc_free(size_t num_allocations, size_t size, size_t min_size, size_t max_size, float free_probability, int methode_chosen);
 
 float benchmark_my_malloc_free(size_t num_allocations, size_t size, size_t min_size, size_t max_size, float free_probability, int methode_chosen);

@@ -52,10 +52,25 @@ void* Allocator::my_malloc(size_t size) {
         // Lock pour protéger l'accès à la liste chaînée
         std::lock_guard<std::mutex> lock(list_mutexes[class_index]);
 
-        // Si un bloc est disponible dans la liste, réutiliser
-        if (free_lists[class_index] != nullptr) {
-            FreeBlock* block = free_lists[class_index];
-            free_lists[class_index] = block->next; // Retirer le bloc de la liste
+        FreeBlock** best_fit = nullptr;
+        FreeBlock** prev = &free_lists[class_index];
+        FreeBlock* current = free_lists[class_index];
+        size_t best_fit_size = SIZE_MAX; 
+
+        // Recherche du bloc le plus adapté (Best Fit)
+        while (current != nullptr) {
+            if (current->size >= total_size && current->size < best_fit_size) {
+                best_fit = prev;
+                best_fit_size = current->size;
+            }
+            prev = &current->next;
+            current = current->next;
+        }
+
+        // Si un bloc est disponible dans la liste et qu'on a trouvé le meilleur, on le réutilise
+        if (best_fit != nullptr) {
+            FreeBlock* block = *best_fit;
+            *best_fit = block->next; // Retirer le bloc de la liste
             freeblock_count[class_index]--;  // Mise à jour du compteur de blocs
             return (void*)((char*)block + sizeof(FreeBlock)); // Retourner la mémoire après l'en-tête
         }
@@ -90,10 +105,19 @@ void Allocator::my_free(void* ptr, size_t size) {
         // Lock pour protéger l'accès à la liste chaînée
         std::lock_guard<std::mutex> lock(list_mutexes[class_index]);
 
+        // Insertion triée du bloc dans la liste chaînée (par taille)
+        FreeBlock** prev = &free_lists[class_index];
+        FreeBlock* current = free_lists[class_index];
+
+        while (current != nullptr && current->size < block->size) {
+            prev = &current->next;
+            current = current->next;
+        }
+
         // Ajouter le bloc à la liste chaînée
-        block->next = free_lists[class_index];
+        block->next = current;
         // Insérer dans la liste chaînée
-        free_lists[class_index] = block;
+        *prev = block;
 
         // Mise à jour du compteur
         freeblock_count[class_index]++;
