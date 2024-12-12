@@ -27,6 +27,9 @@ private:
     static const size_t NUM_CLASSES = 32; // Nombre de classes de tailles (par exemple, 2^5 à 2^36)
     std::vector<FreeBlock*> free_lists;
 
+    // Compteur de blocs libres par classe
+    std::vector<size_t> freeblock_count;
+
     // Tableau de mutex pour protéger chaque liste chaînée
     std::vector<std::mutex> list_mutexes;
 
@@ -39,8 +42,6 @@ private:
     // Fusionner les blocs libres adjacents
     void coalesce_blocks(size_t class_index);
 
-    // Condition pour utiliser cleanup_free_list()
-    bool should_cleanup(size_t class_index);
 public:
     Allocator();
     ~Allocator();

@@ -3,7 +3,7 @@
 
 // Constructeur : initialise les listes chaînées
 Allocator::Allocator() 
-    : free_lists(NUM_CLASSES, nullptr), list_mutexes(NUM_CLASSES) {}
+    : free_lists(NUM_CLASSES, nullptr), list_mutexes(NUM_CLASSES), freeblock_count(NUM_CLASSES, 0) {}
 
 // Destructeur : nettoie les blocs restants (appel optionnel à munmap)
 Allocator::~Allocator() {
@@ -56,6 +56,7 @@ void* Allocator::my_malloc(size_t size) {
         if (free_lists[class_index] != nullptr) {
             FreeBlock* block = free_lists[class_index];
             free_lists[class_index] = block->next; // Retirer le bloc de la liste
+            freeblock_count[class_index]--;  // Mise à jour du compteur de blocs
             return (void*)((char*)block + sizeof(FreeBlock)); // Retourner la mémoire après l'en-tête
         }
     }
@@ -91,15 +92,19 @@ void Allocator::my_free(void* ptr, size_t size) {
 
         // Ajouter le bloc à la liste chaînée
         block->next = free_lists[class_index];
-
         // Insérer dans la liste chaînée
         free_lists[class_index] = block;
+
+        // Mise à jour du compteur
+        freeblock_count[class_index]++;
 
         // Fusionner les blocs adjacents
         coalesce_blocks(class_index);
     }
     // Nettoyer la liste si elle devient trop grande
-    cleanup_free_list(class_index, aligned_size);
+    if (freeblock_count[class_index] > MAX_FREE_BLOCKS) {
+        cleanup_free_list(class_index, aligned_size);
+    }
 }
 
 // Fonction pour limiter la taille d'une liste chaînée
@@ -123,6 +128,8 @@ void Allocator::cleanup_free_list(size_t class_index, size_t block_size) {
                 free_lists[class_index] = next;
             }
             current = next;
+            // Mise à jour du compteur global de blocs
+            freeblock_count[class_index]--;
         } else {
             prev = current;
             current = current->next;
