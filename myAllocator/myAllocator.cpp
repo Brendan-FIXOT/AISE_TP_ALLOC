@@ -1,5 +1,4 @@
 #include "myAllocator.h"
-#include <cassert>
 
 // Constructeur : initialise les listes chaînées
 Allocator::Allocator() 
@@ -48,33 +47,34 @@ void* Allocator::my_malloc(size_t size) {
     size_t total_size = aligned_size + sizeof(FreeBlock); // Inclure l'en-tête
     size_t class_index = get_class_index(aligned_size);
 
-    {
-        // Lock pour protéger l'accès à la liste chaînée
-        std::lock_guard<std::mutex> lock(list_mutexes[class_index]);
+    // Lock pour protéger l'accès à la liste chaînée
+    pthread_mutex_lock(&list_mutexes[class_index]);
 
-        FreeBlock** best_fit = nullptr;
-        FreeBlock** prev = &free_lists[class_index];
-        FreeBlock* current = free_lists[class_index];
-        size_t best_fit_size = SIZE_MAX; 
+    FreeBlock** best_fit = nullptr;
+    FreeBlock** prev = &free_lists[class_index];
+    FreeBlock* current = free_lists[class_index];
+    size_t best_fit_size = SIZE_MAX; 
 
-        // Recherche du bloc le plus adapté (Best Fit)
-        while (current != nullptr) {
-            if (current->size >= total_size && current->size < best_fit_size) {
-                best_fit = prev;
-                best_fit_size = current->size;
-            }
-            prev = &current->next;
-            current = current->next;
+    // Recherche du bloc le plus adapté (Best Fit)
+    while (current != nullptr) {
+        if (current->size >= total_size && current->size < best_fit_size) {
+            best_fit = prev;
+            best_fit_size = current->size;
         }
-
-        // Si un bloc est disponible dans la liste et qu'on a trouvé le meilleur, on le réutilise
-        if (best_fit != nullptr) {
-            FreeBlock* block = *best_fit;
-            *best_fit = block->next; // Retirer le bloc de la liste
-            freeblock_count[class_index]--;  // Mise à jour du compteur de blocs
-            return (void*)((char*)block + sizeof(FreeBlock)); // Retourner la mémoire après l'en-tête
-        }
+        prev = &current->next;
+        current = current->next;
     }
+
+    // Si un bloc est disponible dans la liste et qu'on a trouvé le meilleur, on le réutilise
+    if (best_fit != nullptr && *best_fit != nullptr) {
+        FreeBlock* block = *best_fit;
+        *best_fit = block->next; // Retirer le bloc de la liste
+        freeblock_count[class_index]--;  // Mise à jour du compteur de blocs
+        pthread_mutex_unlock(&list_mutexes[class_index]);
+        return (void*)((char*)block + sizeof(FreeBlock)); // Retourner la mémoire après l'en-tête
+    }
+
+    pthread_mutex_unlock(&list_mutexes[class_index]);
 
     // Allocation la mémoire avec mmap
     void* ptr = mmap(NULL, total_size, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
@@ -101,30 +101,30 @@ void Allocator::my_free(void* ptr, size_t size) {
     FreeBlock* block = (FreeBlock*)((char*)ptr - sizeof(FreeBlock));
     block->size = total_size;
 
-    {
-        // Lock pour protéger l'accès à la liste chaînée
-        std::lock_guard<std::mutex> lock(list_mutexes[class_index]);
+    // Lock pour protéger l'accès à la liste chaînée
+    pthread_mutex_lock(&list_mutexes[class_index]);
 
-        // Insertion triée du bloc dans la liste chaînée (par taille)
-        FreeBlock** prev = &free_lists[class_index];
-        FreeBlock* current = free_lists[class_index];
+    // Insertion triée du bloc dans la liste chaînée (par taille)
+    FreeBlock** prev = &free_lists[class_index];
+    FreeBlock* current = free_lists[class_index];
 
-        while (current != nullptr && current->size < block->size) {
-            prev = &current->next;
-            current = current->next;
-        }
-
-        // Ajouter le bloc à la liste chaînée
-        block->next = current;
-        // Insérer dans la liste chaînée
-        *prev = block;
-
-        // Mise à jour du compteur
-        freeblock_count[class_index]++;
-
-        // Fusionner les blocs adjacents
-        coalesce_blocks(class_index);
+    while (current != nullptr && current->size < block->size) {
+        prev = &current->next;
+        current = current->next;
     }
+
+    // Ajouter le bloc à la liste chaînée
+    block->next = current;
+    // Insérer dans la liste chaînée
+    *prev = block;
+
+    // Mise à jour du compteur
+    freeblock_count[class_index]++;
+
+    pthread_mutex_unlock(&list_mutexes[class_index]);
+
+    // Fusionner les blocs adjacents
+    coalesce_blocks(class_index);
     // Nettoyer la liste si elle devient trop grande
     if (freeblock_count[class_index] > MAX_FREE_BLOCKS) {
         cleanup_free_list(class_index, aligned_size);
@@ -135,7 +135,7 @@ void Allocator::my_free(void* ptr, size_t size) {
 void Allocator::cleanup_free_list(size_t class_index, size_t block_size) {
     size_t free_count = 0;
 
-    std::lock_guard<std::mutex> lock(list_mutexes[class_index]); // Protection de la liste chaînée
+    pthread_mutex_lock(&list_mutexes[class_index]); // Protection de la liste chaînée
 
     FreeBlock* current = free_lists[class_index];
     FreeBlock* prev = nullptr;
@@ -159,9 +159,11 @@ void Allocator::cleanup_free_list(size_t class_index, size_t block_size) {
             current = current->next;
         }
     }
+    pthread_mutex_unlock(&list_mutexes[class_index]);
 }
 
 void Allocator::coalesce_blocks(size_t class_index) {
+    pthread_mutex_lock(&list_mutexes[class_index]);
     FreeBlock* current = free_lists[class_index];
     FreeBlock* prev = nullptr;
 
@@ -174,4 +176,5 @@ void Allocator::coalesce_blocks(size_t class_index) {
         }
         current = current->next;
     }
+    pthread_mutex_unlock(&list_mutexes[class_index]);
 }

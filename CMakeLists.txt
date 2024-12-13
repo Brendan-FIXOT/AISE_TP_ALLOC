@@ -49,3 +49,34 @@ add_custom_target(benchmark_gprof
     COMMAND gprof BENCHMARK gmon.out > ../analyse/analyse.txt
     COMMENT "Exécution des tests de performance avec gprof"
 )
+
+# Commande pour nettoyer le dossier ploting/data/
+add_custom_target(clean_data
+    COMMAND ${CMAKE_COMMAND} -E echo "Nettoyage des fichiers dans ploting/data/"
+    COMMAND ${CMAKE_COMMAND} -E remove -f ../ploting/data/*
+    COMMENT "Nettoyage des fichiers dans le dossier ploting/data"
+)
+
+# Commande pour nettoyer les dossiers ploting/plot/methode1, ploting/plot/methode2 et ploting/plot/methode3
+add_custom_target(clean_plot
+    COMMAND ${CMAKE_COMMAND} -E echo "Nettoyage des fichiers dans ploting/plot/methode1"
+    COMMAND ${CMAKE_COMMAND} -E remove -f ../ploting/plot/methode1/*
+    COMMAND ${CMAKE_COMMAND} -E echo "Nettoyage des fichiers dans ploting/plot/methode2"
+    COMMAND ${CMAKE_COMMAND} -E remove -f ../ploting/plot/methode2/*
+    COMMAND ${CMAKE_COMMAND} -E echo "Nettoyage des fichiers dans ploting/plot/methode3"
+    COMMAND ${CMAKE_COMMAND} -E remove -f ../ploting/plot/methode3/*
+    COMMENT "Nettoyage des fichiers dans les dossiers ploting/plot/methode1, ploting/plot/methode2 et ploting/plot/methode3"
+)
+
+add_custom_target(plot
+    COMMAND ${CMAKE_COMMAND} -E echo "Exécution du script Python plot.py"
+    COMMAND python3 ${CMAKE_SOURCE_DIR}/ploting/plot.py
+    COMMENT "Génération des graphiques avec plot.py"
+)
+
+# Commande pour nettoyer le cache du cmake, puis de refaire un cmake
+add_custom_target(recmake
+    COMMAND ${CMAKE_COMMAND} -E remove -f CMakeCache.txt
+    COMMAND cmake ..
+    COMMENT "Nettoyage de CMakeCache.txt effectué et le cmake va être construit"
+)

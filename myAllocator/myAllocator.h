@@ -6,9 +6,11 @@
 #include <unistd.h>
 #include <stdio.h>
 #include <vector>
+#include <cstdint>
 #include <string.h>
-#include <mutex>
-#include <algorithm> // Pour std::sort
+#include <algorithm>
+#include <cassert>
+#include <pthread.h>
 
 
 // Structure pour représenter un bloc libre
@@ -31,7 +33,7 @@ private:
     std::vector<size_t> freeblock_count;
 
     // Tableau de mutex pour protéger chaque liste chaînée
-    std::vector<std::mutex> list_mutexes;
+    std::vector<pthread_mutex_t> list_mutexes;
 
     // Politique pour gérer les blocs libres (exemple : taille maximale d'une liste)
     static const size_t MAX_FREE_BLOCKS = 100;
