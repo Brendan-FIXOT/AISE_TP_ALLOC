@@ -1,5 +1,32 @@
 import pandas as pd
 import matplotlib.pyplot as plt
+import os
+
+import os
+
+# Chemin de base du dossier 'plot'
+base_path = 'plot'
+
+# Liste des sous-dossiers à créer
+subdirectories = ['methode1', 'methode2', 'methode3']
+
+# Crée le dossier 'plot' s'il n'existe pas
+if not os.path.exists(base_path):
+    result = os.makedirs(base_path, exist_ok=True)
+    if result is None:
+        print(f"Le dossier '{base_path}' a été créé avec succès.")
+else:
+    print(f"Le dossier '{base_path}' existe déjà.")
+
+# Crée les sous-dossiers 'methode1', 'methode2', 'methode3'
+for subdirectory in subdirectories:
+    path = os.path.join(base_path, subdirectory)
+    if not os.path.exists(path):
+        result = os.makedirs(path, exist_ok=True)
+        if result is None:
+            print(f"Le dossier '{path}' a été créé avec succès.")
+    else:
+        print(f"Le dossier '{path}' existe déjà.")
 
 # Chargement des données
 df_num_allocation = pd.read_csv('data/plot_num_allocations.csv')

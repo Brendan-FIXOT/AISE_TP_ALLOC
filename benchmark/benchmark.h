@@ -7,6 +7,7 @@
 #include <random>
 #include <fstream>
 #include <vector>
+#include <filesystem> // Permet de créer des dossiers à travers des programmes
 #include "../myAllocator/myAllocator.h" // Pour my_malloc/my_free
 #include "../myAllocatorBasic/myAllocatorBasic.h" // Pour my_malloc_basic/my_free_basic
 

@@ -11,7 +11,20 @@ int main() {
     // 1) Plot du temps en fonction de num_allocations pour la méthode 3 et 4   //
     / ------------------------------------------------------------------------- */
     {
+        if (std::filesystem::create_directories("../ploting/data/")) {
+            std::cout << "Dossier créé avec succès : " << "../ploting/data/" << std::endl;
+        } else {
+            std::cout << "Le dossier existe déjà ou dans certains cas rare il y a une erreur lors de sa création." << std::endl;
+        }
+
         std::ofstream file_num_allocation("../ploting/data/plot_num_allocations.csv");
+
+        // Vérifie si le fichier s'ouvre correctement
+        if (!file_num_allocation.is_open()) {
+            std::cerr << "Erreur : Impossible d'ouvrir le fichier '../ploting/data/plot_num_allocations.csv'" << std::endl;
+            return 1; // Quitte le programme avec un code d'erreur
+        }
+
         file_num_allocation << "num_allocations,method,duration_malloc_free,duration_my_malloc_free,duration_my_malloc_free_basic\n";
 
         // On fait varier le nombre d'allocations
@@ -48,7 +61,20 @@ int main() {
     // 2) Plot du temps en fonction de la taille max_size pour la méthode 3 et 4   //
     / ---------------------------------------------------------------------------- */
     {
+        if (std::filesystem::create_directories("../ploting/data/")) {
+            std::cout << "Dossier créé avec succès : " << "../ploting/data/" << std::endl;
+        } else {
+            std::cout << "Le dossier existe déjà ou dans certains cas rare il y a une erreur lors de sa création." << std::endl;
+        }
+
         std::ofstream file_sizes("../ploting/data/plot_sizes.csv");
+
+        // Vérifie si le fichier s'ouvre correctement
+        if (!file_sizes.is_open()) {
+            std::cerr << "Erreur : Impossible d'ouvrir le fichier '../ploting/data/plot_sizes.csv'" << std::endl;
+            return 1; // Quitte le programme avec un code d'erreur
+        }
+
         file_sizes << "max_size,method,duration_malloc_free,duration_my_malloc_free,duration_my_malloc_free_basic\n";
 
         size_t num_allocations = 10000; // Fixe
