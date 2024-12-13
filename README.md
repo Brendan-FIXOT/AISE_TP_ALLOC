@@ -150,7 +150,7 @@ Les benchmarks ont été réalisés sur plusieurs scénarios pour comparer les p
 
 ### 1. **Temps d'allocation en fonction du nombre d'allocations**
 
-#### Méthode 1
+#### Méthode 1 (tableau et représentation graphique) :
 
 | Nombre d'allocations | malloc/free (µs) | my_malloc (µs) | my_malloc_basic (µs) |
 | -------------------- | ------------------ | ----------------- | ------------------------ |
@@ -168,7 +168,11 @@ Les benchmarks ont été réalisés sur plusieurs scénarios pour comparer les p
 | 20000                | 253213             | 9880.25          | 39365.8                 |
 | 50000                | 261198             | 9655.69          | 40109.8                 |
 
-#### Méthode 2
+![Aperçu du benchmark de la méthode 1 (nombre d'allocations variant)](assets/methode1/plot_num_allocations_method_1.png)
+
+![Aperçu du benchmark (sans l'allocateur basique) de la méthode 1 (nombre d'allocations variant)](assets/methode1/plot_num_allocations_method_1_without_alloc_basic.png)
+
+#### Méthode 2 (tableau et représentation graphique) :
 
 | Nombre d'allocations | malloc/free (µs) | my_malloc (µs) | my_malloc_basic (µs) |
 | -------------------- | ------------------ | ----------------- | ------------------------ |
@@ -186,7 +190,11 @@ Les benchmarks ont été réalisés sur plusieurs scénarios pour comparer les p
 | 20000                | 1718070            | 1644870          | 45434.2                 |
 | 50000                | 1755250            | 1729150          | 48141.9                 |
 
-#### Méthode 3
+![Aperçu du benchmark de la méthode 2 (nombre d'allocations variant)](assets/methode2/plot_num_allocations_method_2.png)
+
+![Aperçu du benchmark (sans l'allocateur basique) de la méthode 2 (nombre d'allocations variant)](assets/methode2/plot_num_allocations_method_2_without_alloc_basic.png)
+
+#### Méthode 3 (tableau et représentation graphique) :
 
 | Nombre d'allocations | malloc/free (µs) | my_malloc (µs) | my_malloc_basic (µs) |
 | -------------------- | ------------------ | ----------------- | ------------------------ |
@@ -204,9 +212,13 @@ Les benchmarks ont été réalisés sur plusieurs scénarios pour comparer les p
 | 20000                | 210566             | 577317            | 29401.3                 |
 | 50000                | 162780             | 626488            | 30275.4                 |
 
+![Aperçu du benchmark de la méthode 3 (nombre d'allocations variant)](assets/methode3/plot_num_allocations_method_3.png)
+
+![Aperçu du benchmark (sans l'allocateur basique) de la méthode 3 (nombre d'allocations variant)](assets/methode3/plot_num_allocations_method_3_without_alloc_basic.png)
+
 ### 2. **Temps d'allocation en fonction de la taille maximale des allocations**
 
-#### Méthode 1
+#### Méthode 1 (tableau et représentation graphique) :
 
 | Taille max (octets) | malloc/free (µs) | my_malloc (µs) | my_malloc_basic (µs) |
 |--------------------|---------------------|-------------------|--------------------------|
@@ -226,7 +238,11 @@ Les benchmarks ont été réalisés sur plusieurs scénarios pour comparer les p
 | 1024               | 554139                 | 11569.3             | 41863.6                    |
 | 2048               | 427862                 | 10736               | 41400.5                    |
 
-#### Méthode 2
+![Aperçu du benchmark de la méthode 1 (taille max variante)](assets/methode1/plot_sizes_method_1.png)
+
+![Aperçu du benchmark (sans l'allocateur basique) de la méthode 1 (taille max variante)](assets/methode1/plot_sizes_method_1_without_alloc_basic.png)
+
+#### Méthode 2 (tableau et représentation graphique) :
 
 | Taille max (octets) | malloc/free (µs) | my_malloc (µs) | my_malloc_basic (µs) |
 |--------------------|---------------------|-------------------|--------------------------|
@@ -246,7 +262,11 @@ Les benchmarks ont été réalisés sur plusieurs scénarios pour comparer les p
 | 1024               | 1693190                | 1567400             | 49003.5                    |
 | 2048               | 1023750                | 1083310             | 47260.1                    |
 
-#### Méthode 3
+![Aperçu du benchmark de la méthode 2 (taille max variante)](assets/methode2/plot_sizes_method_2.png)
+
+![Aperçu du benchmark (sans l'allocateur basique) de la méthode 2 (taille max variante)](assets/methode2/plot_sizes_method_2_without_alloc_basic.png)
+
+#### Méthode 3 (tableau et représentation graphique) :
 
 | Taille max (octets) | malloc/free (µs) | my_malloc (µs) | my_malloc_basic (µs) |
 |--------------------|---------------------|-------------------|--------------------------|
@@ -265,3 +285,7 @@ Les benchmarks ont été réalisés sur plusieurs scénarios pour comparer les p
 | 512                | 418918                 | 668807              | 37845                      |
 | 1024               | 392773                 | 649477              | 38092.8                    |
 | 2048               | 323112                 | 583771              | 36370.2                    |
+
+![Aperçu du benchmark de la méthode 3 (taille max variante)](assets/methode3/plot_sizes_method_3.png)
+
+![Aperçu du benchmark (sans l'allocateur basique) de la méthode 3 (taille max variante)](assets/methode3/plot_sizes_method_3_without_alloc_basic.png)
